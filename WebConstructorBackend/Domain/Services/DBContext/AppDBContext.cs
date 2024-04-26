@@ -4,7 +4,7 @@ using WebConstructorBackend.Domain.Entities;
 
 namespace WebConstructorBackend.Domain.Services.DBContext
 {
-    public class DBContext : Microsoft.EntityFrameworkCore.DbContext
+    public class AppDBContext : Microsoft.EntityFrameworkCore.DbContext
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
