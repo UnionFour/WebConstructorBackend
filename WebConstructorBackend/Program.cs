@@ -53,11 +53,7 @@ builder.Services
     .AddGraphQLServer()
     .AddAuthorization()
     .AddProjections()
-    .AddTypes()
-    .AddMutationConventions()
-    .AddMongoDbSorting()
-    .AddMongoDbProjections()
-    .AddMongoDbPagingProviders();
+    .AddMutationConventions();
 
 var app = builder.Build();
 
