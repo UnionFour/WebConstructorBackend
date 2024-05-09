@@ -44,7 +44,7 @@ public class TemplateInstallerService(
 		Options.TemplatePath = templatePath;
 
 		var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
-		var args = OperatingSystem.IsWindows() ? "/c npm install" : "-c 'npm install'";
+		var args = OperatingSystem.IsWindows() ? "/c npm install" : "-c \"npm install\"";
 		var process = new Process
 		{
 			StartInfo = new ProcessStartInfo
@@ -57,8 +57,11 @@ public class TemplateInstallerService(
 			}
 		};
 
+		process.OutputDataReceived += (_, eventArgs) => Console.WriteLine(eventArgs.Data);
 		process.Exited += (_, _) => Console.WriteLine("Exited npm install");
+		
 		process.Start();
+		process.BeginOutputReadLine();
 		
 		// TODO: Сделать асинхронным, но так чтобы при build зависимости уже были
 		await process.WaitForExitAsync(stoppingToken);

@@ -67,7 +67,7 @@ app.MapPost("/build",
 
 			var command = $"npm run ng build -- --output-path={buildDirectory.FullName}";
 			var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
-			var args = OperatingSystem.IsWindows() ? $"/c {command}" : $"-c '{command}'";
+			var args = OperatingSystem.IsWindows() ? $"/c {command}" : $"-c \"{command}\"";
 
 			var process = new Process
 			{
