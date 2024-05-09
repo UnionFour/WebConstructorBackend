@@ -1,6 +1,27 @@
 @WebConstructorBackend_HostAddress = http://localhost:5282
 
-GET {{WebConstructorBackend_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{WebConstructorBackend_HostAddress}}/build/
+Content-Type: multipart/form-data; boundary=WebAppBoundary
 
-###
+--WebAppBoundary
+Content-Disposition: form-data; name="organisation"
+Content-Type: text/plain
+
+Org1
+
+--WebAppBoundary
+Content-Disposition: form-data; name="config"; filename="config.json"
+Content-Type: application/json
+
+< ./myconfig.json
+--WebAppBoundary
+Content-Disposition: form-data; name="image1"; filename="image1.png"
+Content-Type: image/png
+
+< ./main-img.png
+
+--WebAppBoundary
+Content-Disposition: form-data; name="image2"; filename="image2.png"
+Content-Type: image/png
+
+< ./secondary-img.png

@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.Diagnostics;
+using System.IO.Compression;
 using System.Reflection;
 using Microsoft.Extensions.Options;
 
@@ -15,20 +16,51 @@ public class TemplateInstallerService(
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
+		// TODO: При указании пути, делать ту же логику, только в другую папку
+		if (Options.TemplatePath != null)
+			throw new NotImplementedException();
+
+		var templateDirectoryLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
+		                                throw new NotImplementedException();
+
+		var templatePath = Path.Combine(templateDirectoryLocation, "template-engine-master");
+		Options.TemplatePath = templatePath;
+
+		if (Directory.Exists(templatePath))
+			return;
+
 		var client = HttpClientFactory.CreateClient();
 		var stream = await client.GetStreamAsync(Options.TemplateUrl, stoppingToken);
 
 		var zipArchive = new ZipArchive(stream);
 
-		var templateDirectoryLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
-		                                throw new NotImplementedException();
 		var zipDirectory = zipArchive.Entries.First().FullName;
 
 		await Task.Run(
 			() => zipArchive.ExtractToDirectory(templateDirectoryLocation, overwriteFiles: true),
 			stoppingToken);
 
-		Options.TemplateDirectory = Path.Combine(templateDirectoryLocation, zipDirectory);
-		Configuration.GetSection(ConstructorOptions.Name).Bind(Options);
+		templatePath = Path.Combine(templateDirectoryLocation, zipDirectory);
+		Options.TemplatePath = templatePath;
+
+		var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
+		var args = OperatingSystem.IsWindows() ? "/c npm install" : "-c 'npm install'";
+		var process = new Process
+		{
+			StartInfo = new ProcessStartInfo
+			{
+				FileName = shell,
+				Arguments = args,
+				WorkingDirectory = templatePath,
+				UseShellExecute = false,
+				RedirectStandardOutput = true
+			}
+		};
+
+		process.Exited += (_, _) => Console.WriteLine("Exited npm install");
+		process.Start();
+		
+		// TODO: Сделать асинхронным, но так чтобы при build зависимости уже были
+		await process.WaitForExitAsync(stoppingToken);
 	}
 }
