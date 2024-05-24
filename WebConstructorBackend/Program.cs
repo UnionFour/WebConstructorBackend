@@ -1,7 +1,14 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using WebConstructorBackend;
 using WebConstructorBackend.Domain.Services.Auth;
 using WebConstructorBackend.Domain.ValueTypes;
+using WebConstructorBackend.Services;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using Path = System.IO.Path;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +28,7 @@ var authSection = builder.Configuration.GetSection("Auth");
 var authOptions = authSection.Get<AuthOptions>();
 
 builder.Services.Configure<AuthOptions>(authSection);
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddDataProtection();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -38,16 +46,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddHttpClient();
-builder.Services.AddAuthorization();
-
-
-// Add services to the container.
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpClient();
+builder.Services.AddAuthorization();
+builder.Services.AddHostedService<TemplateInstallerService>();
+
+builder.Services.Configure<ConstructorOptions>(
+    builder.Configuration.GetSection(ConstructorOptions.Name));
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    // Set the limit to 256 MB
+    options.MultipartBodyLengthLimit = 268435456;
+});
 
 builder.Services
     .AddGraphQLServer()
@@ -56,13 +69,6 @@ builder.Services
     .AddMutationConventions();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 app.UseHttpsRedirection();
 app.UseRouting();
@@ -74,6 +80,73 @@ app.MapGraphQL();
 
 app.UseCors();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.MapPost("/build",
+        async ([FromServices] IOptions<ConstructorOptions> options, [FromForm] BuildRequest request) =>
+        {
+            var sitesDirectory = new DirectoryInfo(options.Value.SitesPath);
+            var tmpDirectory = new DirectoryInfo(Path.GetTempPath());
+            var templateDirectory = new DirectoryInfo(options.Value.TemplatePath ?? throw new NotImplementedException());
+
+            var srcDirectory = tmpDirectory.CreateSubdirectory(request.Organisation);
+            var buildDirectory = sitesDirectory.CreateSubdirectory(request.Organisation);
+
+            Console.WriteLine("Copy dependencies");
+            await Task.Run(() => templateDirectory.DeepCopy(srcDirectory));
+            Console.WriteLine("Completed copy");
+
+            var configPath = Path.Combine(srcDirectory.FullName, "config.json");
+            var configStream = File.Create(configPath);
+            await request.Config.CopyToAsync(configStream);
+            await configStream.DisposeAsync();
+
+            var contentTypes = new[] { "image/png", "image/svg" };
+
+            foreach (var file in request.Files)
+            {
+                if (!contentTypes.Any(type => file.ContentType.Contains(type)))
+                    continue;
+
+                var imagePath = Path.Combine(srcDirectory.FullName, "src", "assets", file.FileName);
+                await using var imageStream = File.Create(imagePath);
+                await file.CopyToAsync(imageStream);
+            }
+
+
+            var command = $"npm run ng build -- --output-path={buildDirectory.FullName}";
+            var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
+            var args = OperatingSystem.IsWindows() ? $"/c {command}" : $"-c \"{command}\"";
+
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = shell,
+                    Arguments = args,
+                    WorkingDirectory = srcDirectory.FullName,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                }
+            };
+
+            process.OutputDataReceived += (_, eventArgs) => Console.WriteLine(eventArgs.Data);
+            process.Exited += (_, _) =>
+            {
+                Console.WriteLine("Exited npm run build");
+                srcDirectory.Delete(true);
+            };
+            process.Start();
+            process.BeginOutputReadLine();
+
+            await process.WaitForExitAsync();
+
+            return Results.Ok();
+        })
+    .DisableAntiforgery();
+
 app.Run();
-
-
