@@ -2,10 +2,16 @@
 {
     public class User
     {
-        public int Id { get; set; }
+        public Guid ID { get; set; }
 
         public string Email { get; set; }
 
+        public string Name { get; set; }
+
         public string passHash { get; set; }
+
+        public bool IsAuthor { get; set; }
+
+        public bool IsCouch { get; set; }
     }
 }
