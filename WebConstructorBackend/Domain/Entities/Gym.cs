@@ -9,7 +9,5 @@
         public string Address { get; set; }
 
         public Guid OrganizationID { get; set; }
-
-        public List<Image> ImagesPath { get; set; }
     }
 }
