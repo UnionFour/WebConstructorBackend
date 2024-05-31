@@ -43,7 +43,7 @@ builder.Services.AddSingleton<IUsersTrainingsRepository, UsersTrainingsRepositor
 builder.Services.AddSingleton<AppDBContext>();
 
 var db = new AppDBContext(
-    new DbContextOptionsBuilder<AppDBContext>().UseInMemoryDatabase("TEST").Options);
+    new DbContextOptionsBuilder<AppDBContext>().UseInMemoryDatabase("MockDB").Options);
 
 builder.Services.AddDataProtection();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

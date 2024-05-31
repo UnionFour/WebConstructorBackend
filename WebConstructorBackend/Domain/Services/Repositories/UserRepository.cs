@@ -32,13 +32,11 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             return _db.Users;
         }
 
-        public User UpdateUser(Guid id, User newUser)
+        public User UpdateUser(User newUser)
         {
-            var user = _db.Users.FirstOrDefault(x => x.ID == id);
-            if (user != null)
+            if (newUser != null)
             {
-                _db.Users.Remove(user);
-                _db.Users.Add(newUser);
+                _db.Users.Update(newUser);
                 _db.SaveChanges();
             }
             return newUser;

@@ -6,9 +6,9 @@ namespace WebConstructorBackend.Domain.Services.Repositories
     {
         public Gym CreateGym(Gym gym);
 
-        public Gym UpdateGym(Guid id, Gym gym);
+        public Gym UpdateGym(Gym gym);
 
-        public Gym DeleteGym(Guid id);
+        public void DeleteGym(Guid id);
 
         public Gym GetGymById(Guid id);
 

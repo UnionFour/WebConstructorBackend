@@ -13,22 +13,41 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 
         public Training CreateTraining(Training training)
         {
-            throw new NotImplementedException();
+            if (training == null)
+                return null;
+
+            if (training.ID == Guid.Empty || training.ID.ToString() == null)
+                training.ID = Guid.NewGuid();
+
+            _db.Trainings.Add(training);
+            _db.SaveChanges();
+
+            return training;
         }
 
         public void DeleteTraining(Guid id)
         {
-            throw new NotImplementedException();
+            var training = _db.Trainings.FirstOrDefault(x => x.ID == id);
+            if (training != null)
+            {
+                _db.Trainings.Remove(training);
+                _db.SaveChanges();
+            }
         }
 
         public Training GetTraining(Guid id)
         {
-            throw new NotImplementedException();
+            return _db.Trainings.FirstOrDefault(t => t.ID == id);
         }
 
-        public Training UpdateTraining(Guid id, Training training)
+        public Training UpdateTraining(Training training)
         {
-            throw new NotImplementedException();
+            if (training != null)
+            {
+                _db.Trainings.Update(training);
+                _db.SaveChanges();
+            }
+            return training;
         }
     }
 }

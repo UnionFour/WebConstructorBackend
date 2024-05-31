@@ -8,7 +8,7 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 
         public IEnumerable<User> GetUsers();
 
-        public User UpdateUser(Guid id, User newUser);
+        public User UpdateUser(User newUser);
 
         public void DeleteUser(Guid id);
     }

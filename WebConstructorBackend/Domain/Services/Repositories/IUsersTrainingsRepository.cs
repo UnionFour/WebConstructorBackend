@@ -6,11 +6,9 @@ namespace WebConstructorBackend.Domain.Services.Repositories
     {
         public UsersTrainings GetTrainingInfo(Guid id);
 
-        public List<Training> GetUsersTrainingHistory(Guid userId);
+        public bool IsTrainingPayed (Guid trainingId);
 
-        public bool IsTrainingPayed (Guid userId, Guid trainingId);
-
-        public UsersTrainings UpdateUsersTraining(Guid id, UsersTrainings training);
+        public UsersTrainings UpdateUsersTraining(UsersTrainings training);
 
         public UsersTrainings CreateUsersTrainings(UsersTrainings training);
     }

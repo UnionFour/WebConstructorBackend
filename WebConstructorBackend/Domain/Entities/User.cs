@@ -15,5 +15,7 @@
         public bool IsAuthor { get; set; }
 
         public bool IsCouch { get; set; }
+
+        public BilingAccount BilingAccount { get; set; }
     }
 }

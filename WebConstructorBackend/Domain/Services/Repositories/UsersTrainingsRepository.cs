@@ -27,19 +27,19 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             return _db.UsersTrainings.FirstOrDefault(x => x.ID == id);
         }
 
-        public List<Training> GetUsersTrainingHistory(Guid userId)
+        public bool IsTrainingPayed(Guid trainingId)
         {
-            throw new NotImplementedException();
+            return _db.UsersTrainings.FirstOrDefault(x => x.ID == trainingId).IsPaied;
         }
 
-        public bool IsTrainingPayed(Guid userId, Guid trainingId)
+        public UsersTrainings UpdateUsersTraining(UsersTrainings training)
         {
-            throw new NotImplementedException();
-        }
-
-        public UsersTrainings UpdateUsersTraining(Guid id, UsersTrainings training)
-        {
-            throw new NotImplementedException();
+            if (training != null)
+            {
+                _db.UsersTrainings.Update(training);
+                _db.SaveChanges();
+            }
+            return training;
         }
     }
 }

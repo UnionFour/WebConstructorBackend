@@ -13,27 +13,44 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 
         public Gym CreateGym(Gym gym)
         {
-            throw new NotImplementedException();
+            if (gym.ID == Guid.Empty)
+                gym.ID = Guid.NewGuid();
+
+            _db.Gyms.Add(gym);
+            _db.SaveChanges();
+
+            return gym;
         }
 
-        public Gym DeleteGym(Guid id)
+        public void DeleteGym(Guid id)
         {
-            throw new NotImplementedException();
+            var gym = _db.Gyms.FirstOrDefault(x => x.ID == id);
+
+            _db.Gyms.Remove(gym);
+            _db.SaveChanges();
+
         }
 
         public Gym GetGymById(Guid id)
         {
-            throw new NotImplementedException();
+            return _db.Gyms.FirstOrDefault(x => x.ID == id);
         }
 
         public List<Gym> GetOrganizationsGyms(Guid organizationID)
         {
-            throw new NotImplementedException();
+            var org = _db.Organizations.FirstOrDefault(x => x.ID == organizationID);
+
+            if (org == null)
+                return null;
+            return org.Gyms;
         }
 
-        public Gym UpdateGym(Guid id, Gym gym)
+        public Gym UpdateGym(Gym gym)
         {
-            throw new NotImplementedException();
+            _db.Gyms.Update(gym);
+            _db.SaveChanges();
+
+            return gym;
         }
     }
 }
