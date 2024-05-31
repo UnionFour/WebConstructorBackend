@@ -4,14 +4,19 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 {
     public class UsersTrainingsRepository : IUsersTrainingsRepository
     {
-        public UsersTrainings CreateUsersTrainings(Guid userId, Training training)
+        private readonly List<UsersTrainings> usersTrainings;
+
+        public UsersTrainings CreateUsersTrainings(UsersTrainings training)
         {
-            throw new NotImplementedException();
+            if (training.ID != null || training.ID.ToString() != "")
+                usersTrainings.Add(training);
+
+            return training;
         }
 
         public UsersTrainings GetTrainingInfo(Guid id)
         {
-            throw new NotImplementedException();
+            return usersTrainings.FirstOrDefault(x => x.ID == id);
         }
 
         public List<Training> GetUsersTrainingHistory(Guid userId)

@@ -12,6 +12,6 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 
         public UsersTrainings UpdateUsersTraining(Guid id, UsersTrainings training);
 
-        public UsersTrainings CreateUsersTrainings(Guid userId, Training training);
+        public UsersTrainings CreateUsersTrainings(UsersTrainings training);
     }
 }
