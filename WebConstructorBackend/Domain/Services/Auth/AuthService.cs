@@ -33,7 +33,7 @@ namespace WebConstructorBackend.Domain.Services.Auth
                 Claims = new Dictionary<string, object>
                 {
                     [JwtRegisteredClaimNames.Email] = input.Email,
-                    [JwtRegisteredClaimNames.Sub] = user.Id.ToString() ?? throw new InvalidDataException()
+                    [JwtRegisteredClaimNames.Sub] = user.ID.ToString() ?? throw new InvalidDataException()
                 },
                 Issuer = AuthOptions.Issuer,
                 Audience = AuthOptions.Audience,
@@ -46,7 +46,7 @@ namespace WebConstructorBackend.Domain.Services.Auth
 
             return new UserPayload
             {
-                Id = user.Id.ToString(),
+                Id = user.ID.ToString(),
                 Login = user.Email,
                 Token = accessToken
             };
