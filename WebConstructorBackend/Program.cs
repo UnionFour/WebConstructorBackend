@@ -9,6 +9,7 @@ using WebConstructorBackend.Services;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Path = System.IO.Path;
+using WebConstructorBackend.Domain.Services.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +29,14 @@ var authSection = builder.Configuration.GetSection("Auth");
 var authOptions = authSection.Get<AuthOptions>();
 
 builder.Services.Configure<AuthOptions>(authSection);
+
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddSingleton<IUserRepository, UserRepository>();
+builder.Services.AddSingleton<IGymRepository, GymRepository>();
+builder.Services.AddSingleton<IOrganizationRepository, OrganizationRepository>();
+builder.Services.AddSingleton<ITrainingRepository, TrainingRepository>();
+builder.Services.AddSingleton<IUsersTrainingsRepository, UsersTrainingsRepository>();
 
 builder.Services.AddDataProtection();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -8,7 +8,7 @@ namespace WebConstructorBackend.Domain.Services.Repositories
     {
         private readonly List<User> _users;
 
-        public UserRepository(DbSet<User> users)
+        public UserRepository([])
         {
             using var context = new AppDBContext();
             var _users = new List<User>
