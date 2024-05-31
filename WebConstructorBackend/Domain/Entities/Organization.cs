@@ -13,5 +13,7 @@
         public string Email { get; set; }
 
         public List<Gym> Gyms { get; set; } = new List<Gym>();
+
+        public List<User> Couches { get; set; } = new List<User>();
     }
 }

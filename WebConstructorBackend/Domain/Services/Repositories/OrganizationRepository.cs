@@ -1,14 +1,14 @@
 ﻿using WebConstructorBackend.Domain.Entities;
+using WebConstructorBackend.Domain.Services.DBContext;
 
 namespace WebConstructorBackend.Domain.Services.Repositories
 {
     public class OrganizationRepository : IOrganizationRepository
     {
-        private readonly List<Organization> _organizations;
-
-        public OrganizationRepository()
+        private readonly AppDBContext _db;
+        public OrganizationRepository([Service] AppDBContext db)
         {
-
+            _db = db;
         }
 
         public User AddCouch(User couch)

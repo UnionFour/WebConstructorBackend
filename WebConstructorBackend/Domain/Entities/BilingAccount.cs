@@ -7,10 +7,5 @@
         public Guid UserID { get; set; }
 
         public float Rest {  get; set; }
-
-        public void PayForTraining()
-        {
-
-        }
     }
 }

@@ -6,40 +6,40 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly List<User> _users;
-
-        public UserRepository([])
+        private readonly AppDBContext _db;
+        public UserRepository([Service] AppDBContext db)
         {
-            using var context = new AppDBContext();
-            var _users = new List<User>
-            {
-                new User { ID = Guid.Parse("80270d58-6165-4cf1-b910-72b969bff3f5"), Email = "test@mail.ru", passHash = "1234"},
-                new User { ID = Guid.Parse("0f6022df-4af4-42ca-b513-15a7be3a52fd"), Email = "admin@mail.ru", passHash = "admin"}
-            };
-            context.Users.AddRange(_users);
-            context.SaveChanges();
+            _db = db;
         }
+
         public void DeleteUser(Guid id)
         {
-            var user = _users.Find(x => x.ID == id);
+            var user = _db.Users.FirstOrDefault(x => x.ID == id);
             if(user != null)
-                _users.Remove(user);
+            {
+                _db.Users.Remove(user);
+                _db.SaveChanges();
+            }
         }
 
-        public User GetUser(Guid id) => _users.FirstOrDefault(x => x.ID == id);
+        public User GetUser(Guid id) 
+        {
+            return _db.Users.FirstOrDefault(x => x.ID == id);
+        }
 
         public IEnumerable<User> GetUsers()
         {
-            return _users;
+            return _db.Users;
         }
 
         public User UpdateUser(Guid id, User newUser)
         {
-            var user = _users.Find(x => x.ID == id);
+            var user = _db.Users.FirstOrDefault(x => x.ID == id);
             if (user != null)
             {
-                _users.Remove(user);
-                _users.Add(newUser);
+                _db.Users.Remove(user);
+                _db.Users.Add(newUser);
+                _db.SaveChanges();
             }
             return newUser;
         }

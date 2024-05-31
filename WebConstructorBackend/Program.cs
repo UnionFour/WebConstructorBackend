@@ -10,6 +10,9 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Path = System.IO.Path;
 using WebConstructorBackend.Domain.Services.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System;
+using WebConstructorBackend.Domain.Services.DBContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +40,10 @@ builder.Services.AddSingleton<IGymRepository, GymRepository>();
 builder.Services.AddSingleton<IOrganizationRepository, OrganizationRepository>();
 builder.Services.AddSingleton<ITrainingRepository, TrainingRepository>();
 builder.Services.AddSingleton<IUsersTrainingsRepository, UsersTrainingsRepository>();
+builder.Services.AddSingleton<AppDBContext>();
+
+var db = new AppDBContext(
+    new DbContextOptionsBuilder<AppDBContext>().UseInMemoryDatabase("TEST").Options);
 
 builder.Services.AddDataProtection();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

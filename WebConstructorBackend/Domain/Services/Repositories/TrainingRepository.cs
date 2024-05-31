@@ -1,9 +1,16 @@
 ﻿using WebConstructorBackend.Domain.Entities;
+using WebConstructorBackend.Domain.Services.DBContext;
 
 namespace WebConstructorBackend.Domain.Services.Repositories
 {
     public class TrainingRepository : ITrainingRepository
     {
+        private readonly AppDBContext _db;
+        public TrainingRepository([Service] AppDBContext db)
+        {
+            _db = db;
+        }
+
         public Training CreateTraining(Training training)
         {
             throw new NotImplementedException();
