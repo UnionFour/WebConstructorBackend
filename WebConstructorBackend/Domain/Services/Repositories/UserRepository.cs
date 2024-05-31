@@ -21,19 +21,27 @@ namespace WebConstructorBackend.Domain.Services.Repositories
         }
         public void DeleteUser(Guid id)
         {
-            throw new NotImplementedException();
+            var user = _users.Find(x => x.ID == id);
+            if(user != null)
+                _users.Remove(user);
         }
 
         public User GetUser(Guid id) => _users.FirstOrDefault(x => x.ID == id);
 
         public IEnumerable<User> GetUsers()
         {
-            throw new NotImplementedException();
+            return _users;
         }
 
         public User UpdateUser(Guid id, User newUser)
         {
-            throw new NotImplementedException();
+            var user = _users.Find(x => x.ID == id);
+            if (user != null)
+            {
+                _users.Remove(user);
+                _users.Add(newUser);
+            }
+            return newUser;
         }
     }
 }
