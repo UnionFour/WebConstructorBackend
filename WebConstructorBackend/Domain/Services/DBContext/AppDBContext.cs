@@ -10,37 +10,37 @@ namespace WebConstructorBackend.Domain.Services.DBContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseInMemoryDatabase(databaseName: "MockDB");
+            //optionsBuilder.UseInMemoryDatabase(databaseName: "MockDB");
 
-            var user = new User()
-            {
-                ID = Guid.Parse("01147d68-f0cc-4c9f-ada1-66e923fc382e"),
-                Email = "User@gmail.ru",
-                passHash = "UserPassword",
-                Name = "Григорцев Григорий Григорьевич"
-            };
+            //var user = new User()
+            //{
+            //    ID = Guid.Parse("01147d68-f0cc-4c9f-ada1-66e923fc382e"),
+            //    Email = "User@gmail.ru",
+            //    passHash = "UserPassword",
+            //    Name = "Григорцев Григорий Григорьевич"
+            //};
 
-            var couch = new Couch()
-            {
-                ID = Guid.Parse("6f26ff94-cecf-4144-a495-c2e189e3d03f"),
-                Email = "Couch@gmail.ru",
-                passHash = "CouchPassword",
-                Name = "Стрельцов Аркадий Михайлович"
-            };
+            //var couch = new Couch()
+            //{
+            //    ID = Guid.Parse("6f26ff94-cecf-4144-a495-c2e189e3d03f"),
+            //    Email = "Couch@gmail.ru",
+            //    passHash = "CouchPassword",
+            //    Name = "Стрельцов Аркадий Михайлович"
+            //};
 
-            var organizator = new Organizator()
-            {
-                ID = Guid.Parse("88dd1000-3204-497c-8280-99cea55a34f5"),
-                Email = "Organizator@gmail.ru",
-                passHash = "OrganizatorePassword",
-                Name = "Главных Денис Борисовч"
-            };
+            //var organizator = new Organizator()
+            //{
+            //    ID = Guid.Parse("88dd1000-3204-497c-8280-99cea55a34f5"),
+            //    Email = "Organizator@gmail.ru",
+            //    passHash = "OrganizatorePassword",
+            //    Name = "Главных Денис Борисовч"
+            //};
 
-            Users.Add(user);
-            Users.Add(couch);
-            Users.Add(organizator);
+            //Users.Add(user);
+            //Users.Add(couch);
+            //Users.Add(organizator);
 
-            SaveChanges();
+            //SaveChanges();
         }
 
         public virtual DbSet<User>? Users { get; set; }

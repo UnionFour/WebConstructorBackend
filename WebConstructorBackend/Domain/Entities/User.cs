@@ -6,11 +6,11 @@
 
         public string Email { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public string passHash { get; set; }
 
-        public string AvatarPicturePath { get; set; }
+        public string? AvatarPicturePath { get; set; }
 
         public BilingAccount BilingAccount { get; set; }
 

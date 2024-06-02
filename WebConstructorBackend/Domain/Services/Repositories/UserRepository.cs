@@ -27,6 +27,9 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             if (user.ID == Guid.Empty)
                 user.ID = Guid.NewGuid();
 
+            if (user.BilingAccount == null)
+                user.BilingAccount = new BilingAccount() { ID = Guid.NewGuid(), Rest = 0, User = user, UserID = user.ID };
+
             _db.Users.Add(user);
             _db.SaveChanges();
 
