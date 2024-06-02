@@ -43,7 +43,7 @@ app.MapPost("/build",
 			var srcDirectory = tmpDirectory.CreateSubdirectory(request.Organisation);
 			var buildDirectory = sitesDirectory.CreateSubdirectory(request.Organisation);
 
-			Console.WriteLine("Copy dependencies");
+			Console.WriteLine("Copy template");
 			await Task.Run(() => templateDirectory.DeepCopy(srcDirectory));
 			Console.WriteLine("Completed copy");
 
@@ -64,7 +64,9 @@ app.MapPost("/build",
 				await file.CopyToAsync(imageStream);
 			}
 
-
+			var nodeModulesDirectory = Path.Combine(options.Value.NodeModulesPath ?? throw new NotImplementedException(), "node_modules");
+			Directory.CreateSymbolicLink(Path.Combine(srcDirectory.FullName, "node_modules"), nodeModulesDirectory);
+			
 			var command = $"npm run ng build -- --output-path={buildDirectory.FullName}";
 			var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
 			var args = OperatingSystem.IsWindows() ? $"/c {command}" : $"-c \"{command}\"";
