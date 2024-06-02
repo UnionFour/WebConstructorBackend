@@ -4,9 +4,9 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 {
     public interface IUsersTrainingsRepository
     {
-        public UsersTrainings GetTrainingInfo(Guid id);
+        public UsersTrainings GetTrainingInfo(Guid userID, Guid trainingID);
 
-        public bool IsTrainingPayed (Guid trainingId);
+        public bool IsTrainingPayed (Guid userID, Guid trainingID);
 
         public UsersTrainings UpdateUsersTraining(UsersTrainings training);
 

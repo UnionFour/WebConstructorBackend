@@ -13,7 +13,7 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 
         public UsersTrainings CreateUsersTrainings(UsersTrainings training)
         {
-            if (training.ID != null || training.ID.ToString() != "")
+            if ((training.TrainingID != null && training.UserID  != null) || (training.TrainingID.ToString() != "" && training.UserID.ToString() != ""))
             {
                 _db.UsersTrainings.Add(training);
                 _db.SaveChanges();
@@ -22,14 +22,14 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             return training;
         }
 
-        public UsersTrainings GetTrainingInfo(Guid id)
+        public UsersTrainings GetTrainingInfo(Guid userID, Guid trainingID)
         {
-            return _db.UsersTrainings.FirstOrDefault(x => x.ID == id);
+            return _db.UsersTrainings.FirstOrDefault(x => x.TrainingID == trainingID && x.UserID == userID);
         }
 
-        public bool IsTrainingPayed(Guid trainingId)
+        public bool IsTrainingPayed(Guid userID, Guid trainingID)
         {
-            return _db.UsersTrainings.FirstOrDefault(x => x.ID == trainingId).IsPaied;
+            return _db.UsersTrainings.FirstOrDefault(x => x.TrainingID == trainingID && x.UserID == userID).IsPaied;
         }
 
         public UsersTrainings UpdateUsersTraining(UsersTrainings training)

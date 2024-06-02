@@ -3,6 +3,5 @@
     [MutationType]
     public class Mutation
     {
-        public 
     }
 }
