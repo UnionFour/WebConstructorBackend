@@ -17,7 +17,7 @@ public class TemplateInstallerService(
 		var templateDirectoryLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
 		                                throw new NotImplementedException();
 
-		var templatePath = Path.Combine(templateDirectoryLocation, "template-engine-master");
+		var templatePath = System.IO.Path.Combine(templateDirectoryLocation, "template-engine-master");
 		Options.TemplatePath = templatePath;
 
 		var client = HttpClientFactory.CreateClient();
@@ -31,7 +31,7 @@ public class TemplateInstallerService(
 			() => zipArchive.ExtractToDirectory(templateDirectoryLocation, overwriteFiles: true),
 			stoppingToken);
 
-		templatePath = Path.Combine(templateDirectoryLocation, zipDirectory);
+		templatePath = System.IO.Path.Combine(templateDirectoryLocation, zipDirectory);
 		Options.TemplatePath = templatePath;
 
 		var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
