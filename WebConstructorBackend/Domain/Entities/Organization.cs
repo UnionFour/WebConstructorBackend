@@ -10,11 +10,13 @@
 
         public string Email { get; set; }
 
-        public List<Gym> Gyms { get; set; } = new List<Gym>();
+        public ICollection<Gym> Gyms { get; set; } = new List<Gym>();
 
-        public List<User> Couches { get; set; } = new List<User>();
+        public ICollection<Couch> Couches { get; set; } = new List<Couch>();
+
+        public ICollection<SportEvent> Events { get; set; } = new List<SportEvent>();
 
         public Guid OrganizatorID { get; set; }
-        public User Organizator { get; set; }
+        public Organizator Organizator { get; set; }
     }
 }

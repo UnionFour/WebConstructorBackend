@@ -10,5 +10,7 @@
 
         public Guid OrganizationID { get; set; }
         public Organization Organization { get; set; }
+
+        public ICollection<SportEvent> SportEvents { get; set; }  = new List<SportEvent>();
     }
 }

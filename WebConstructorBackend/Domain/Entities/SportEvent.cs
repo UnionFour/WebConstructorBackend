@@ -10,8 +10,12 @@
 
         public DateTime StartDate { get; set;}
 
-        public string Address { get; set;}
+        public Guid GymID { get; set;}
+        public Gym Address { get; set;}
 
-        public List<User> Subscraibers { get; set;}
+        public Guid OrganizationID { get; set;}
+        public Organization Organization { get; set;}
+
+        public ICollection<UsersSportEvents> UsersSportEvents { get; set;}
     }
 }

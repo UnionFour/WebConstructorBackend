@@ -17,29 +17,23 @@ namespace WebConstructorBackend.Domain.Services.DBContext
                 ID = Guid.Parse("01147d68-f0cc-4c9f-ada1-66e923fc382e"),
                 Email = "User@gmail.ru",
                 passHash = "UserPassword",
-                Name = "Григорцев Григорий Григорьевич",
-                IsAuthor = false,
-                IsCouch = false
+                Name = "Григорцев Григорий Григорьевич"
             };
 
-            var couch = new User()
+            var couch = new Couch()
             {
                 ID = Guid.Parse("6f26ff94-cecf-4144-a495-c2e189e3d03f"),
                 Email = "Couch@gmail.ru",
                 passHash = "CouchPassword",
-                Name = "Стрельцов Аркадий Михайлович",
-                IsAuthor = false,
-                IsCouch = true
+                Name = "Стрельцов Аркадий Михайлович"
             };
 
-            var organizator = new User()
+            var organizator = new Organizator()
             {
                 ID = Guid.Parse("88dd1000-3204-497c-8280-99cea55a34f5"),
                 Email = "Organizator@gmail.ru",
                 passHash = "OrganizatorePassword",
-                Name = "Главных Денис Борисовчи",
-                IsAuthor = true,
-                IsCouch = false
+                Name = "Главных Денис Борисовч"
             };
 
             Users.Add(user);
@@ -70,6 +64,54 @@ namespace WebConstructorBackend.Domain.Services.DBContext
                 .HasForeignKey(ut => ut.UserID);
             modelBuilder.Entity<UsersTrainings>()
                 .HasKey(ut => new {ut.UserID, ut.TrainingID});
+
+            // SportEvents <-> User
+            modelBuilder.Entity<UsersSportEvents>()
+                .HasOne(use => use.User)
+                .WithMany(u => u.UsersSportEvents)
+                .HasForeignKey(use => use.UserID);
+            modelBuilder.Entity<UsersSportEvents>()
+                .HasOne(use => use.SportEvent)
+                .WithMany(se => se.UsersSportEvents)
+                .HasForeignKey(use => use.SportEventID);
+            modelBuilder.Entity<UsersSportEvents>()
+                .HasKey(use => new { use.UserID, use.SportEventID });
+
+            // Organization -> Gym
+            modelBuilder.Entity<Gym>()
+                .HasOne(g => g.Organization)
+                .WithMany(o => o.Gyms)
+                .HasForeignKey(g => g.OrganizationID);
+
+            // Organization -> Couch
+            modelBuilder.Entity<Couch>()
+                .HasOne(c => c.Organization)
+                .WithMany(o =>o.Couches)
+                .HasForeignKey(o => o.OrganizationID);
+
+            // Organization -> SportEvents
+            modelBuilder.Entity<SportEvent>()
+                .HasOne(se => se.Organization)
+                .WithMany(o => o.Events)
+                .HasForeignKey(se => se.OrganizationID);
+
+            // Gym - SportEvent
+            modelBuilder.Entity<SportEvent>()
+                .HasOne(se => se.Address)
+                .WithMany(g => g.SportEvents)
+                .HasForeignKey(se => se.GymID);
+
+            // Organization - Organizator
+            modelBuilder.Entity<Organizator>()
+                .HasOne(o => o.Organization)
+                .WithOne(o => o.Organizator)
+                .HasForeignKey<Organizator>(o => o.OrganizationID);
+
+            // User - BillingAccount
+            modelBuilder.Entity<BilingAccount>()
+                .HasOne(ba => ba.User)
+                .WithOne(u => u.BilingAccount)
+                .HasForeignKey<BilingAccount>(ba => ba.UserID);
         }
     }
 }
