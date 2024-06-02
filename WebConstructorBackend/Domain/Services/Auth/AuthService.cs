@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using WebConstructorBackend.Domain.Entities;
+using WebConstructorBackend.Domain.Services.DBContext;
+using WebConstructorBackend.Domain.Services.Repositories;
 using WebConstructorBackend.Domain.ValueTypes;
 
 namespace WebConstructorBackend.Domain.Services.Auth
@@ -11,9 +13,9 @@ namespace WebConstructorBackend.Domain.Services.Auth
     {
         private AuthOptions AuthOptions { get; }
         private ITimeLimitedDataProtector TimeLimitedDataProtector { get; }
-        private DbSet<User> users;
+        private IUserRepository users;
 
-        public AuthService(AuthOptions authOptions, ITimeLimitedDataProtector timeLimitedDataProtector, DbSet<User> users)
+        public AuthService(AuthOptions authOptions, ITimeLimitedDataProtector timeLimitedDataProtector, [FromServices] IUserRepository users)
         {
             AuthOptions = authOptions;
             TimeLimitedDataProtector = timeLimitedDataProtector;
@@ -22,7 +24,7 @@ namespace WebConstructorBackend.Domain.Services.Auth
 
         public UserPayload AuthorizeUser(UserAuthInput input)
         {
-            var user = users.FirstOrDefault(x => x.Email == input.Email);
+            var user = users.GetUserByEmail(input.Email);
 
             if (user == null) throw new Exception(message: "User is not registrated");
             if (user.passHash != input.Password) throw new Exception(message: "wrong Password or Email");
@@ -54,9 +56,18 @@ namespace WebConstructorBackend.Domain.Services.Auth
 
         public UserPayload RegisterUser(UserAuthInput input)
         {
-            var user = users.FirstOrDefault(x => x.Email == input.Email);
+            var user = users.GetUserByEmail(input.Email);
             if (user == null)
-                users.Add(new User { Email = input.Email, passHash = input.Password });
+            {
+                if (input.IsCouch)
+                    user = new Couch { Email = input.Email, passHash = input.Password };
+                else if (input.IsOrganizator)
+                    user = new Organizator { Email = input.Email, passHash = input.Password };
+                else
+                    user = new User { Email = input.Email, passHash = input.Password };
+
+                users.CreateUser(user);
+            }
             else
                 throw new Exception(message: "user with such Email is already exists");
 

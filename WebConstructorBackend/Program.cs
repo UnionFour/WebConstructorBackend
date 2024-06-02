@@ -34,7 +34,6 @@ var authOptions = authSection.Get<AuthOptions>();
 builder.Services.Configure<AuthOptions>(authSection);
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-
 builder.Services.AddSingleton<IUserRepository, UserRepository>();
 builder.Services.AddSingleton<IGymRepository, GymRepository>();
 builder.Services.AddSingleton<IOrganizationRepository, OrganizationRepository>();
@@ -163,5 +162,8 @@ app.MapPost("/build",
             return Results.Ok();
         })
     .DisableAntiforgery();
+
+app.MapPost("/auth/registration", ([FromServices]IAuthService authService, UserAuthInput input) => { return authService.RegisterUser(input); });
+app.MapPost("/auth/authorization", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.AuthorizeUser(input); });
 
 app.Run();
