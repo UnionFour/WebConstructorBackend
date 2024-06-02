@@ -12,6 +12,6 @@
 
         public string Address { get; set;}
 
-        public List<User> Subscrabers { get; set;}
+        public List<User> Subscraibers { get; set;}
     }
 }

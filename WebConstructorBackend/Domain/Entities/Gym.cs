@@ -9,5 +9,6 @@
         public string Address { get; set; }
 
         public Guid OrganizationID { get; set; }
+        public Organization Organization { get; set; }
     }
 }

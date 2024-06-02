@@ -10,12 +10,17 @@
 
         public string Room { get; set; }
 
-        public Guid CoachID { get; set; }
-
         public DateTime TrainingStart { get; set; }
 
         public DateTime TrainingEnd { get; set; }
 
         public float Cost { get; set; }
+        public ICollection<UsersTrainings> UsersTrainings { get; set; } = new List<UsersTrainings>();
+
+        public Guid CouchID { get; set; }
+        public User Couch { get; set; }
+
+        public Guid OrganizationID { get; set; }
+        public Organization Organization { get; set; }
     }
 }

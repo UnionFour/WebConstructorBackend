@@ -57,8 +57,19 @@ namespace WebConstructorBackend.Domain.Services.DBContext
         public virtual DbSet<Training>? Trainings { get; set; }
         public virtual DbSet<UsersTrainings>? UsersTrainings { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder mb)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // user <-> training
+            modelBuilder.Entity<UsersTrainings>()
+                .HasOne(ut => ut.Training)
+                .WithMany(t => t.UsersTrainings)
+                .HasForeignKey(ut => ut.TrainingID);
+            modelBuilder.Entity<UsersTrainings>()
+                .HasOne(ut => ut.User)
+                .WithMany(u => u.UsersTrainings)
+                .HasForeignKey(ut => ut.UserID);
+            modelBuilder.Entity<UsersTrainings>()
+                .HasKey(ut => new {ut.UserID, ut.TrainingID});
         }
     }
 }
