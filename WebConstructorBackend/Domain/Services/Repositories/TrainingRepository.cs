@@ -1,4 +1,5 @@
-﻿using WebConstructorBackend.Domain.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebConstructorBackend.Domain.Entities;
 using WebConstructorBackend.Domain.Services.DBContext;
 
 namespace WebConstructorBackend.Domain.Services.Repositories
@@ -6,7 +7,7 @@ namespace WebConstructorBackend.Domain.Services.Repositories
     public class TrainingRepository : ITrainingRepository
     {
         private readonly AppDBContext _db;
-        public TrainingRepository([Service] AppDBContext db)
+        public TrainingRepository([FromServices] AppDBContext db)
         {
             _db = db;
         }

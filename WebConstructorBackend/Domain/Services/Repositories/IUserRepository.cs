@@ -6,6 +6,10 @@ namespace WebConstructorBackend.Domain.Services.Repositories
     {
         public User GetUser(Guid id);
 
+        public User CreateUser(User user);
+
+        public User GetUserByEmail(string email);
+
         public IEnumerable<User> GetUsers();
 
         public User UpdateUser(User newUser);

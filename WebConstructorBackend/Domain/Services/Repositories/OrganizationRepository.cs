@@ -1,4 +1,5 @@
-﻿using WebConstructorBackend.Domain.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebConstructorBackend.Domain.Entities;
 using WebConstructorBackend.Domain.Services.DBContext;
 
 namespace WebConstructorBackend.Domain.Services.Repositories
@@ -6,12 +7,12 @@ namespace WebConstructorBackend.Domain.Services.Repositories
     public class OrganizationRepository : IOrganizationRepository
     {
         private readonly AppDBContext _db;
-        public OrganizationRepository([Service] AppDBContext db)
+        public OrganizationRepository([FromServices] AppDBContext db)
         {
             _db = db;
         }
 
-        public User AddCouch(Guid organizationID, User couch)
+        public Couch AddCouch(Guid organizationID, Couch couch)
         {
             var org = _db.Organizations.FirstOrDefault(x => x.ID == organizationID);
             if (org == null)
@@ -33,13 +34,13 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             return org.Couches.FirstOrDefault(x => x.ID == couchID);
         }
 
-        public List<User> GetCouches(Guid organizationID)
+        public List<Couch> GetCouches(Guid organizationID)
         {
             var org = _db.Organizations.FirstOrDefault(x => x.ID == organizationID);
             if (org == null)
                 return null;
 
-            return org.Couches;
+            return org.Couches.ToList();
         }
 
         public Gym GetGym(Guid organizationID, Guid gymID)
@@ -57,7 +58,7 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             if (org == null)
                 return null;
 
-            return org.Gyms;
+            return org.Gyms.ToList();
         }
 
         public Organization GetOrganization(Guid id)
@@ -65,13 +66,13 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             return _db.Organizations.FirstOrDefault(o => o.ID == id);
         }
 
-        public User GetOrganizator(Guid organizationID)
+        public Organizator GetOrganizator(Guid organizationID)
         {
             var org = _db.Organizations.FirstOrDefault(x => x.ID == organizationID);
             if (org == null)
                 return null;
 
-            return _db.Users.FirstOrDefault(x => x.ID == org.OrganizatorID);
+            return (Organizator)_db.Users.FirstOrDefault(x => x.ID == org.OrganizatorID);
         }
 
         public List<User> GetVisitors(Guid organizationID)

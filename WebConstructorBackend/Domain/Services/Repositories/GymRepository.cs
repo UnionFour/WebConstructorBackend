@@ -1,4 +1,5 @@
-﻿using WebConstructorBackend.Domain.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebConstructorBackend.Domain.Entities;
 using WebConstructorBackend.Domain.Services.DBContext;
 
 namespace WebConstructorBackend.Domain.Services.Repositories
@@ -6,7 +7,7 @@ namespace WebConstructorBackend.Domain.Services.Repositories
     public class GymRepository : IGymRepository
     {
         private readonly AppDBContext _db;
-        public GymRepository([Service] AppDBContext db) 
+        public GymRepository([FromServices] AppDBContext db) 
         {
             _db = db;
         }
@@ -42,7 +43,7 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 
             if (org == null)
                 return null;
-            return org.Gyms;
+            return org.Gyms.ToList();
         }
 
         public Gym UpdateGym(Gym gym)

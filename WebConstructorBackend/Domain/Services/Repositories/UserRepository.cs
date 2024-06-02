@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebConstructorBackend.Domain.Entities;
 using WebConstructorBackend.Domain.Services.DBContext;
 
@@ -7,7 +7,7 @@ namespace WebConstructorBackend.Domain.Services.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly AppDBContext _db;
-        public UserRepository([Service] AppDBContext db)
+        public UserRepository([FromServices] AppDBContext db)
         {
             _db = db;
         }
@@ -22,9 +22,25 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             }
         }
 
+        public User CreateUser(User user)
+        {
+            if (user.ID == Guid.Empty)
+                user.ID = Guid.NewGuid();
+
+            _db.Users.Add(user);
+            _db.SaveChanges();
+
+            return user;
+        }
+
         public User GetUser(Guid id) 
         {
             return _db.Users.FirstOrDefault(x => x.ID == id);
+        }
+
+        public User GetUserByEmail(string email) 
+        {
+            return _db.Users.FirstOrDefault(x => x.Email == email);
         }
 
         public IEnumerable<User> GetUsers()
