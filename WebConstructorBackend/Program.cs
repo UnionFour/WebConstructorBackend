@@ -34,15 +34,13 @@ var authOptions = authSection.Get<AuthOptions>();
 builder.Services.Configure<AuthOptions>(authSection);
 
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<IUserRepository, UserRepository>();
-builder.Services.AddSingleton<IGymRepository, GymRepository>();
-builder.Services.AddSingleton<IOrganizationRepository, OrganizationRepository>();
-builder.Services.AddSingleton<ITrainingRepository, TrainingRepository>();
-builder.Services.AddSingleton<IUsersTrainingsRepository, UsersTrainingsRepository>();
-builder.Services.AddSingleton<AppDBContext>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGymRepository, GymRepository>();
+builder.Services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+builder.Services.AddScoped<ITrainingRepository, TrainingRepository>();
+builder.Services.AddScoped<IUsersTrainingsRepository, UsersTrainingsRepository>();
 
-var db = new AppDBContext(
-    new DbContextOptionsBuilder<AppDBContext>().UseInMemoryDatabase("MockDB").Options);
+builder.Services.AddDbContextPool<AppDBContext>(options => options.UseInMemoryDatabase("MockDB"));
 
 builder.Services.AddDataProtection();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -80,7 +78,8 @@ builder.Services
     .AddGraphQLServer()
     .AddAuthorization()
     .AddProjections()
-    .AddMutationConventions();
+    .AddMutationConventions()
+    .RegisterDbContext<AppDBContext>();
 
 var app = builder.Build();
 
@@ -163,7 +162,7 @@ app.MapPost("/build",
         })
     .DisableAntiforgery();
 
-app.MapPost("/auth/registration", ([FromServices]IAuthService authService, UserAuthInput input) => { return authService.RegisterUser(input); });
+app.MapPost("/auth/registration", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.RegisterUser(input); });
 app.MapPost("/auth/authorization", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.AuthorizeUser(input); });
 
 app.Run();
