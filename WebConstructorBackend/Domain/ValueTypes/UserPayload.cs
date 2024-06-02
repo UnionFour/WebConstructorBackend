@@ -7,5 +7,9 @@
         public string Login { get; set; }
 
         public string Token { get; set; }
+
+        public bool IsCouch { get; set; }
+
+        public bool isOrganizator { get; set; }
     }
 }

@@ -14,6 +14,10 @@
 
         public BilingAccount BilingAccount { get; set; }
 
+        public bool IsCouch {  get; set; }
+        
+        public bool IsOrganizator { get; set; }
+
         public ICollection<UsersTrainings> UsersTrainings { get; set; } = new List<UsersTrainings>();
         public ICollection<UsersSportEvents> UsersSportEvents { get; set; } = new List<UsersSportEvents>();
     }

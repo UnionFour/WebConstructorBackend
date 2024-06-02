@@ -8,6 +8,6 @@ public static class DirectoryInfoExtensions
 			DeepCopy(dir, destination.CreateSubdirectory(dir.Name));
 
 		foreach (var file in source.GetFiles())
-			file.CopyTo(Path.Combine(destination.FullName, file.Name), true);
+			file.CopyTo(System.IO.Path.Combine(destination.FullName, file.Name), true);
 	}
 }

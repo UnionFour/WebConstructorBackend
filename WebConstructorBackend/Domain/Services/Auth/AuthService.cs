@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using WebConstructorBackend.Domain.Entities;
@@ -13,12 +14,14 @@ namespace WebConstructorBackend.Domain.Services.Auth
     {
         private AuthOptions AuthOptions { get; }
         private ITimeLimitedDataProtector TimeLimitedDataProtector { get; }
-        private IUserRepository users;
+        private IUserRepository users { get; }
 
-        public AuthService(AuthOptions authOptions, ITimeLimitedDataProtector timeLimitedDataProtector, [FromServices] IUserRepository users)
+        public AuthService(IOptions<AuthOptions> authOptions, IDataProtectionProvider dataProtectionProvider, [FromServices] IUserRepository users)
         {
-            AuthOptions = authOptions;
-            TimeLimitedDataProtector = timeLimitedDataProtector;
+            AuthOptions = authOptions.Value;
+            TimeLimitedDataProtector = TimeLimitedDataProtector = dataProtectionProvider
+                .CreateProtector("auth")
+                .ToTimeLimitedDataProtector();
             this.users = users;
         }
 
@@ -50,7 +53,9 @@ namespace WebConstructorBackend.Domain.Services.Auth
             {
                 Id = user.ID.ToString(),
                 Login = user.Email,
-                Token = accessToken
+                Token = accessToken,
+                isOrganizator = user.IsOrganizator,
+                IsCouch = user.IsCouch
             };
         }
 
@@ -60,11 +65,11 @@ namespace WebConstructorBackend.Domain.Services.Auth
             if (user == null)
             {
                 if (input.IsCouch)
-                    user = new Couch { Email = input.Email, passHash = input.Password };
+                    user = new Couch { Email = input.Email, passHash = input.Password, IsCouch = true, IsOrganizator = false };
                 else if (input.IsOrganizator)
-                    user = new Organizator { Email = input.Email, passHash = input.Password };
+                    user = new Organizator { Email = input.Email, passHash = input.Password, IsCouch = true, IsOrganizator = true };
                 else
-                    user = new User { Email = input.Email, passHash = input.Password };
+                    user = new User { Email = input.Email, passHash = input.Password, IsCouch = false, IsOrganizator = false };
 
                 users.CreateUser(user);
             }
