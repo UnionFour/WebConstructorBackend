@@ -13,6 +13,7 @@ using WebConstructorBackend.Domain.Services.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using WebConstructorBackend.Domain.Services.DBContext;
+using WebConstructorBackend.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +100,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// controll area
 app.MapPost("/build",
         async ([FromServices] IOptions<ConstructorOptions> options, [FromForm] BuildRequest request) =>
         {
@@ -167,4 +169,37 @@ app.MapPost("/build",
 app.MapPost("/auth/registration", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.RegisterUser(input); });
 app.MapPost("/auth/authorization", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.AuthorizeUser(input); });
 
+// user
+app.MapPost("/user/update", ([FromServices] IUserRepository userRepository, User user) => { return userRepository.UpdateUser(user); });
+app.MapGet("/user/get", ([FromServices] IUserRepository userRepository, Guid id) => { return userRepository.GetUser(id); });
+app.MapGet("/user/getByEmail", ([FromServices] IUserRepository userRepository, string email) => { return userRepository.GetUserByEmail(email); });
+
+// organization
+app.MapGet("organization/{name}", ([FromServices] IOrganizationRepository organizationRepository, string name) => { return organizationRepository.GetOrganizationByName(name); });
+app.MapPost("organization/update", ([FromServices] IOrganizationRepository organizationRepository, Organization org) => { return organizationRepository.UpdateOrganization(org); });
+app.MapPost("organization/create", ([FromServices] IOrganizationRepository organizationRepository, Organization org) => { return organizationRepository.CreateOrganization(org); });
+
+app.MapPost("organization/gym/add", ([FromServices] IOrganizationRepository organizationRepository, Guid orgID, Gym gym) => { return organizationRepository.AddGym(orgID, gym); });
+app.MapDelete("organization/gym/remove", ([FromServices] IOrganizationRepository organizationRepository, Guid orgID, Gym gym) => { organizationRepository.RemoveGym(orgID, gym); });
+app.MapGet("Organization/gyms", ([FromServices] IOrganizationRepository organizationRepository, Guid id) => { return organizationRepository.GetGymes(id); });
+app.MapGet("Organization/gym", ([FromServices] IOrganizationRepository organizationRepository, Guid orgid, Guid gymid) => { return organizationRepository.GetGym(orgid, gymid); });
+
+app.MapPost("organization/couch/add", ([FromServices] IOrganizationRepository organizationRepository, Guid orgID, Couch couch) => { return organizationRepository.AddCouch(orgID, couch); });
+app.MapDelete("organization/couch/remove", ([FromServices] IOrganizationRepository organizationRepository, Guid orgID, Couch couch) => { organizationRepository.RemoveCouch(orgID, couch); });
+app.MapGet("organization/couch", ([FromServices] IOrganizationRepository organizationRepository, Guid orgid, Guid couchid) => { return organizationRepository.GetCouch(orgid, couchid); });
+app.MapGet("organization/couches", ([FromServices] IOrganizationRepository organizationRepository, Guid id) => { return organizationRepository.GetCouches(id); });
+
+// gym
+app.MapPost("gym/create", ([FromServices] IGymRepository gymRepository, Gym gym) => { return gymRepository.CreateGym(gym); });
+app.MapPost("gym/update", ([FromServices] IGymRepository gymRepository, Gym gym) => { return gymRepository.UpdateGym(gym); });
+app.MapGet("gym/{id}", ([FromServices] IGymRepository gymRepository, Guid id) => { return gymRepository.GetGymById(id); });
+app.MapDelete("gym/remove", ([FromServices] IGymRepository gymRepository, Guid id) => { gymRepository.DeleteGym(id); });
+
+// training
+app.MapPost("training/create", ([FromServices] ITrainingRepository trainingRepository, Training gym) => { return trainingRepository.CreateTraining(gym); });
+app.MapPost("training/update", ([FromServices] ITrainingRepository trainingRepository, Training gym) => { return trainingRepository.UpdateTraining(gym); });
+app.MapGet("training/{id}", ([FromServices] ITrainingRepository trainingRepository, Guid id) => { return trainingRepository.GetTraining(id); });
+app.MapDelete("training/remove", ([FromServices] ITrainingRepository trainingRepository, Guid id) => { trainingRepository.DeleteTraining(id); });
+
+// endcontroll area
 app.Run();
