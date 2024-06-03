@@ -14,7 +14,7 @@ public class TemplateInstallerService(
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		var templateDirectoryLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
+		var templateDirectoryLocation = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
 		                                throw new NotImplementedException();
 
 		var templatePath = System.IO.Path.Combine(templateDirectoryLocation, "template-engine-master");
@@ -36,7 +36,7 @@ public class TemplateInstallerService(
 
 		var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
 
-		Options.NodeModulesPath ??= Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? 
+		Options.NodeModulesPath ??= System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? 
 		                            throw new NotImplementedException();
 
 		var command = $"npm install {templatePath}";
