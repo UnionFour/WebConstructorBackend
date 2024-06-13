@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO.Compression;
 using WebConstructorBackend.Domain.Services.DBContext;
+using WebConstructorBackend.Domain.Entities;
+using WebConstructorBackend.Domain.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +101,7 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
+// controll area
 app.MapPost("/build",
 		async ([FromServices] IOptions<ConstructorOptions> options,
 			[FromServices] IHttpClientFactory httpClientFactory,
@@ -190,7 +193,41 @@ app.MapPost("/build",
 		})
 	.DisableAntiforgery();
 
-app.MapPost("/auth/registration", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.RegisterUser(input); });
-app.MapPost("/auth/authorization", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.AuthorizeUser(input); });
+app.MapPost("/auth/registration", async([FromServices] IAuthService authService, UserAuthInput input) => { return authService.RegisterUser(input); });
+app.MapPost("/auth/authorization", async([FromServices] IAuthService authService, UserAuthInput input) => { return authService.AuthorizeUser(input); });
 
+// user
+app.MapPost("/user/update", async([FromServices] IUserRepository userRepository, User user) => { return userRepository.UpdateUser(user); });
+app.MapGet("/user/get", async([FromServices] IUserRepository userRepository, Guid id) => { return userRepository.GetUser(id); });
+app.MapGet("/user/getByEmail", async([FromServices] IUserRepository userRepository, string email) => { return userRepository.GetUserByEmail(email); });
+
+// organization
+app.MapGet("organization/{name}", async([FromServices] IOrganizationRepository organizationRepository, string name) => { return organizationRepository.GetOrganizationByName(name); });
+app.MapGet("organization/organizator/{id}", async([FromServices] IOrganizationRepository organizationRepository, Guid id) => { return organizationRepository.GetOrganizationByUser(id); });
+app.MapPost("organization/update", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] Organization org) => { return organizationRepository.UpdateOrganization(org); });
+app.MapPost("organization/create", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] Organization org) => { return organizationRepository.CreateOrganization(org); });
+
+app.MapPost("organization/gym/add", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] OrganizationDTO orgDTO) => { return organizationRepository.AddGym(orgDTO.Organization.ID, orgDTO.Gym); });
+app.MapDelete("organization/gym/remove", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] OrganizationDTO orgDTO) => { organizationRepository.RemoveGym(orgDTO.Organization.ID, orgDTO.Gym); });
+app.MapGet("Organization/gyms", async([FromServices] IOrganizationRepository organizationRepository, Guid id) => { return organizationRepository.GetGymes(id); });
+app.MapGet("Organization/gym", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] OrganizationDTO orgDTO) => { return organizationRepository.GetGym(orgDTO.Organization.ID, orgDTO.Gym.ID); });
+
+app.MapPost("organization/couch/add", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] OrganizationDTO orgDTO) => { return organizationRepository.AddCouch(orgDTO.Organization.ID, orgDTO.Couch); });
+app.MapDelete("organization/couch/remove", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] OrganizationDTO orgDTO) => { organizationRepository.RemoveCouch(orgDTO.Organization.ID, orgDTO.Couch); });
+app.MapGet("organization/couch", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] OrganizationDTO orgDTO) => { return organizationRepository.GetCouch(orgDTO.Organization.ID, orgDTO.Couch.ID); });
+app.MapGet("organization/couches", async([FromServices] IOrganizationRepository organizationRepository, Guid id) => { return organizationRepository.GetCouches(id); });
+
+// gym
+app.MapPost("gym/create", async([FromServices] IGymRepository gymRepository, Gym gym) => { return gymRepository.CreateGym(gym); });
+app.MapPost("gym/update", async([FromServices] IGymRepository gymRepository, Gym gym) => { return gymRepository.UpdateGym(gym); });
+app.MapGet("gym/{id}", async([FromServices] IGymRepository gymRepository, Guid id) => { return gymRepository.GetGymById(id); });
+app.MapDelete("gym/remove", async([FromServices] IGymRepository gymRepository, Guid id) => { gymRepository.DeleteGym(id); });
+
+// training
+app.MapPost("training/create", async([FromServices] ITrainingRepository trainingRepository, Training gym) => { return trainingRepository.CreateTraining(gym); });
+app.MapPost("training/update", async([FromServices] ITrainingRepository trainingRepository, Training gym) => { return trainingRepository.UpdateTraining(gym); });
+app.MapGet("training/{id}", async([FromServices] ITrainingRepository trainingRepository, Guid id) => { return trainingRepository.GetTraining(id); });
+app.MapDelete("training/remove", async([FromServices] ITrainingRepository trainingRepository, Guid id) => { trainingRepository.DeleteTraining(id); });
+
+// endcontroll area
 app.Run();

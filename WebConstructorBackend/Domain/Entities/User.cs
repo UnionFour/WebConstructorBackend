@@ -18,6 +18,8 @@
         
         public bool IsOrganizator { get; set; }
 
+        public string OrganizationName { get; set; }
+
         public ICollection<UsersTrainings> UsersTrainings { get; set; } = new List<UsersTrainings>();
         public ICollection<UsersSportEvents> UsersSportEvents { get; set; } = new List<UsersSportEvents>();
     }

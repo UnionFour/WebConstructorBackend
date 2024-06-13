@@ -12,6 +12,33 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             _db = db;
         }
 
+        public Organization CreateOrganization(Organization organization)
+        {
+            if (organization.ID == Guid.Empty)
+                organization.ID = Guid.NewGuid();
+
+            if (_db.Organizations.Where(x => x.Name == organization.Name) == null)
+            {
+                _db.Organizations.Add(organization);
+                _db.SaveChanges();
+            }
+
+            return organization;
+        }
+
+        public Organization UpdateOrganization(Organization organization)
+        {
+            if (organization != null)
+                _db.Organizations.Update(organization);
+
+            return organization;
+        }
+
+        public Organization GetOrganizationByName(string name)
+        {
+            return _db.Organizations.FirstOrDefault(x => x.Name == name);
+        }
+
         public Couch AddCouch(Guid organizationID, Couch couch)
         {
             var org = _db.Organizations.FirstOrDefault(x => x.ID == organizationID);
@@ -23,6 +50,12 @@ namespace WebConstructorBackend.Domain.Services.Repositories
             _db.SaveChanges();
 
             return couch;
+        }
+
+        public void RemoveCouch(Guid organizationID, Couch couch)
+        {
+            var org = GetOrganization(organizationID);
+            org.Couches.Remove(couch);
         }
 
         public User GetCouch(Guid organizationID, Guid couchID)
@@ -50,6 +83,19 @@ namespace WebConstructorBackend.Domain.Services.Repositories
                 return null;
 
             return org.Gyms.FirstOrDefault(x => x.ID == gymID);
+        }
+
+        public Gym AddGym(Guid organizationID, Gym gym)
+        {
+            var org = GetOrganization(organizationID);
+            org.Gyms.Add(gym);
+            return gym;
+        }
+
+        public void RemoveGym(Guid organizationID, Gym gym)
+        {
+            var org = GetOrganization(organizationID);
+            org.Gyms.Remove(gym);
         }
 
         public List<Gym> GetGymes(Guid organizationID)
@@ -82,6 +128,20 @@ namespace WebConstructorBackend.Domain.Services.Repositories
                 return null;
 
             return null;
+        }
+
+        public bool IsUserOrganizator(Guid userID)
+        {
+            var usersOrganization = _db.Organizations.Where(x => x.OrganizatorID == userID);
+
+            if (usersOrganization.Count() > 1)
+                throw new Exception("Пользователь владеет больше чем одной организацией");
+            return usersOrganization.Count() == 0 ? false : true;
+        }
+
+        public Organization GetOrganizationByUser(Guid userID)
+        {
+            return _db.Organizations.FirstOrDefault(x => x.OrganizatorID == userID);
         }
     }
 }
