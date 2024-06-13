@@ -16,13 +16,19 @@ namespace WebConstructorBackend.Domain.Services.Auth
         private ITimeLimitedDataProtector TimeLimitedDataProtector { get; }
         private IUserRepository users { get; }
 
-        public AuthService(IOptions<AuthOptions> authOptions, IDataProtectionProvider dataProtectionProvider, [FromServices] IUserRepository users)
+        private IOrganizationRepository organizations { get; }
+
+        public AuthService(IOptions<AuthOptions> authOptions,
+            IDataProtectionProvider dataProtectionProvider,
+            [FromServices] IUserRepository users,
+            [FromServices] IOrganizationRepository organization)
         {
             AuthOptions = authOptions.Value;
             TimeLimitedDataProtector = TimeLimitedDataProtector = dataProtectionProvider
                 .CreateProtector("auth")
                 .ToTimeLimitedDataProtector();
             this.users = users;
+            organizations = organization;
         }
 
         public UserPayload AuthorizeUser(UserAuthInput input)
@@ -55,6 +61,7 @@ namespace WebConstructorBackend.Domain.Services.Auth
                 Login = user.Email,
                 Token = accessToken,
                 isOrganizator = user.IsOrganizator,
+                Organization = user.Organization,
                 IsCouch = user.IsCouch
             };
         }
@@ -65,18 +72,23 @@ namespace WebConstructorBackend.Domain.Services.Auth
             if (user == null)
             {
                 if (input.IsCouch)
-                    user = new Couch { Email = input.Email, passHash = input.Password, IsCouch = true, IsOrganizator = false };
+                    user = new Couch { IsCouch = true, IsOrganizator = false };
                 else if (input.IsOrganizator)
-                    user = new Organizator { Email = input.Email, passHash = input.Password, IsCouch = true, IsOrganizator = true };
+                    user = new Organizator { IsCouch = true, IsOrganizator = true };
                 else
-                    user = new User { Email = input.Email, passHash = input.Password, IsCouch = false, IsOrganizator = false };
+                    user = new User { IsCouch = false, IsOrganizator = false };
 
+                user.Email = input.Email;
+                user.passHash = input.Password;
+                user.Organization = input.Organization;
+                if (organizations.GetOrganizationByName(user.Organization.Name) == null)
+                    organizations.CreateOrganization(new Organization { Name = user.Organization.Name, Organizator = user as Organizator, OrganizatorID = user.ID});
                 users.CreateUser(user);
             }
             else
                 throw new Exception(message: "user with such Email is already exists");
 
-            return AuthorizeUser(new UserAuthInput { Email = input.Email, Password = input.Password });
+            return AuthorizeUser(new UserAuthInput { Email = input.Email, Password = input.Password, Organization = input.Organization });
         }
     }
 }
