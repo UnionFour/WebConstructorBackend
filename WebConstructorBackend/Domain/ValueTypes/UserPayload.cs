@@ -8,7 +8,7 @@ namespace WebConstructorBackend.Domain.ValueTypes
 
         public string Login { get; set; }
 
-        public Organization Organization { get; set; }
+        public string OrganizationName { get; set; }
 
         public string Token { get; set; }
 

@@ -44,7 +44,8 @@ namespace WebConstructorBackend.Domain.Services.Auth
                 Claims = new Dictionary<string, object>
                 {
                     [JwtRegisteredClaimNames.Email] = input.Email,
-                    [JwtRegisteredClaimNames.Sub] = user.ID.ToString() ?? throw new InvalidDataException()
+                    [JwtRegisteredClaimNames.Sub] = user.ID.ToString() ?? throw new InvalidDataException(),
+                    [JwtRegisteredClaimNames.Name] = input.OrganizationName
                 },
                 Issuer = AuthOptions.Issuer,
                 Audience = AuthOptions.Audience,
@@ -61,7 +62,7 @@ namespace WebConstructorBackend.Domain.Services.Auth
                 Login = user.Email,
                 Token = accessToken,
                 isOrganizator = user.IsOrganizator,
-                Organization = user.Organization,
+                OrganizationName = user.OrganizationName,
                 IsCouch = user.IsCouch
             };
         }
@@ -80,15 +81,15 @@ namespace WebConstructorBackend.Domain.Services.Auth
 
                 user.Email = input.Email;
                 user.passHash = input.Password;
-                user.Organization = input.Organization;
-                if (organizations.GetOrganizationByName(user.Organization.Name) == null)
-                    organizations.CreateOrganization(new Organization { Name = user.Organization.Name, Organizator = user as Organizator, OrganizatorID = user.ID});
+                user.OrganizationName = input.OrganizationName;
+                if (organizations.GetOrganizationByName(user.OrganizationName) == null)
+                    organizations.CreateOrganization(new Organization { Name = user.OrganizationName, Organizator = user as Organizator, OrganizatorID = user.ID});
                 users.CreateUser(user);
             }
             else
                 throw new Exception(message: "user with such Email is already exists");
 
-            return AuthorizeUser(new UserAuthInput { Email = input.Email, Password = input.Password, Organization = input.Organization });
+            return AuthorizeUser(new UserAuthInput { Email = input.Email, Password = input.Password, OrganizationName = input.OrganizationName });
         }
     }
 }

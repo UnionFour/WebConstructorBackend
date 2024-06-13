@@ -8,7 +8,7 @@ namespace WebConstructorBackend.Domain.ValueTypes
 
         public string Password { get; set; } = string.Empty;
 
-        public Organization Organization { get; set; }
+        public string OrganizationName { get; set; }
 
         public bool IsOrganizator { get; set; }
 
