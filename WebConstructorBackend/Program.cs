@@ -12,6 +12,7 @@ using Path = System.IO.Path;
 using WebConstructorBackend.Domain.Services.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO.Compression;
 using WebConstructorBackend.Domain.Services.DBContext;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,12 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+	options.AddDefaultPolicy(policy =>
+	{
+		policy.AllowAnyOrigin()
+			.AllowAnyMethod()
+			.AllowAnyHeader();
+	});
 });
 
 // Authorization
@@ -44,19 +45,19 @@ builder.Services.AddDbContextPool<AppDBContext>(options => options.UseInMemoryDa
 
 builder.Services.AddDataProtection();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = authOptions?.Issuer,
-            ValidateAudience = true,
-            ValidAudience = authOptions?.Audience,
-            ValidateLifetime = true,
-            IssuerSigningKey = authOptions?.GetSymmetricSecurityKey(),
-            ValidateIssuerSigningKey = true
-        };
-    });
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidIssuer = authOptions?.Issuer,
+			ValidateAudience = true,
+			ValidAudience = authOptions?.Audience,
+			ValidateLifetime = true,
+			IssuerSigningKey = authOptions?.GetSymmetricSecurityKey(),
+			ValidateIssuerSigningKey = true
+		};
+	});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -66,20 +67,20 @@ builder.Services.AddAuthorization();
 builder.Services.AddHostedService<TemplateInstallerService>();
 
 builder.Services.Configure<ConstructorOptions>(
-    builder.Configuration.GetSection(ConstructorOptions.Name));
+	builder.Configuration.GetSection(ConstructorOptions.Name));
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    // Set the limit to 256 MB
-    options.MultipartBodyLengthLimit = 268435456;
+	// Set the limit to 256 MB
+	options.MultipartBodyLengthLimit = 268435456;
 });
 
 builder.Services
-    .AddGraphQLServer()
-    .AddAuthorization()
-    .AddProjections()
-    .AddMutationConventions()
-    .RegisterDbContext<AppDBContext>();
+	.AddGraphQLServer()
+	.AddAuthorization()
+	.AddProjections()
+	.AddMutationConventions()
+	.RegisterDbContext<AppDBContext>();
 
 var app = builder.Build();
 
@@ -94,90 +95,100 @@ app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 app.MapPost("/build",
-        async ([FromServices] IOptions<ConstructorOptions> options, [FromForm] BuildRequest request) =>
-        {
-            var sitesDirectory = new DirectoryInfo(options.Value.SitesPath);
-            var tmpDirectory = new DirectoryInfo(Path.GetTempPath());
-            var templateDirectory = new DirectoryInfo(options.Value.TemplatePath ?? throw new NotImplementedException());
+		async ([FromServices] IOptions<ConstructorOptions> options,
+			[FromServices] IHttpClientFactory httpClientFactory,
+			[FromForm] BuildRequest request) =>
+		{
+			var client = httpClientFactory.CreateClient();
+			var stream = await client.GetStreamAsync(options.Value.TemplateUrl);
 
-            var srcDirectory = tmpDirectory.CreateSubdirectory(request.Organisation);
-            var buildDirectory = sitesDirectory.CreateSubdirectory(request.Organisation);
+			var zipArchive = new ZipArchive(stream);
+
+			await Task.Run(
+				() => zipArchive.ExtractToDirectory(options.Value.TemplatePath, overwriteFiles: true));
+
+			var sitesDirectory = new DirectoryInfo(options.Value.SitesPath);
+			var tmpDirectory = new DirectoryInfo(Path.GetTempPath());
+			var templateDirectory = new DirectoryInfo(options.Value.TemplatePath ?? throw new NotImplementedException());
+
+			var srcDirectory = tmpDirectory.CreateSubdirectory(request.Organisation);
+			var buildDirectory = sitesDirectory.CreateSubdirectory(request.Organisation);
 
 			Console.WriteLine("Copy template");
 			await Task.Run(() => templateDirectory.DeepCopy(srcDirectory));
 			Console.WriteLine("Completed copy");
 
-            var configPath = Path.Combine(srcDirectory.FullName, "config.json");
-            var configStream = File.Create(configPath);
-            await request.Config.CopyToAsync(configStream);
-            await configStream.DisposeAsync();
+			var configPath = Path.Combine(srcDirectory.FullName, "config.json");
+			var configStream = File.Create(configPath);
+			await request.Config.CopyToAsync(configStream);
+			await configStream.DisposeAsync();
 
-            var contentTypes = new[] { "image/png", "image/svg" };
+			var contentTypes = new[] { "image/png", "image/svg" };
 
-            foreach (var file in request.Files)
-            {
-                if (!contentTypes.Any(type => file.ContentType.Contains(type)))
-                    continue;
+			foreach (var file in request.Files)
+			{
+				if (!contentTypes.Any(type => file.ContentType.Contains(type)))
+					continue;
 
-                var imagePath = Path.Combine(srcDirectory.FullName, "src", "assets", file.FileName);
-                await using var imageStream = File.Create(imagePath);
-                await file.CopyToAsync(imageStream);
-            }
+				var imagePath = Path.Combine(srcDirectory.FullName, "src", "assets", file.FileName);
+				await using var imageStream = File.Create(imagePath);
+				await file.CopyToAsync(imageStream);
+			}
 
 			var nodeModulesDirectory = Path.Combine(options.Value.NodeModulesPath ?? throw new NotImplementedException(), "node_modules");
 			Directory.CreateSymbolicLink(Path.Combine(srcDirectory.FullName, "node_modules"), nodeModulesDirectory);
-			
+
 			var command = $"npm run ng build -- --output-path={buildDirectory.FullName} --base-href /{request.Organisation}/";
 			var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
 			var args = OperatingSystem.IsWindows() ? $"/c {command}" : $"-c \"{command}\"";
 
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = shell,
-                    Arguments = args,
-                    WorkingDirectory = srcDirectory.FullName,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                }
-            };
+			var process = new Process
+			{
+				StartInfo = new ProcessStartInfo
+				{
+					FileName = shell,
+					Arguments = args,
+					WorkingDirectory = srcDirectory.FullName,
+					UseShellExecute = false,
+					RedirectStandardOutput = true,
+				}
+			};
 
-            process.OutputDataReceived += (_, eventArgs) => Console.WriteLine(eventArgs.Data);
-            process.Exited += async (_, _) =>
-            {
-                Console.WriteLine("Exited npm run build");
-                
-                var browserPath = Path.Combine(buildDirectory.FullName, "browser");
-                var browserDirectory = new DirectoryInfo(browserPath);
-                    
-                if (Directory.Exists(browserPath))
-                {
-                    browserDirectory.DeepCopy(buildDirectory);
-                    browserDirectory.Delete(recursive: true);
-                }
-                
-                var browserConfigPath = Path.Combine(buildDirectory.FullName, "config.json");
-                var browserConfigStream = File.Create(browserConfigPath);
-                
-                await request.Config.CopyToAsync(browserConfigStream);
-                
-                srcDirectory.Delete(true);
-            };
-            
-            process.Start();
-            process.BeginOutputReadLine();
+			process.OutputDataReceived += (_, eventArgs) => Console.WriteLine(eventArgs.Data);
+			process.Exited += async (_, _) =>
+			{
+				Console.WriteLine("Exited npm run build");
 
-            await process.WaitForExitAsync();
+				var browserPath = Path.Combine(buildDirectory.FullName, "browser");
+				var browserDirectory = new DirectoryInfo(browserPath);
 
-            return Results.Ok();
-        })
-    .DisableAntiforgery();
+				if (Directory.Exists(browserPath))
+				{
+					browserDirectory.DeepCopy(buildDirectory);
+					browserDirectory.Delete(recursive: true);
+				}
+
+				var browserConfigPath = Path.Combine(buildDirectory.FullName, "config.json");
+				var browserConfigStream = File.Create(browserConfigPath);
+
+				await request.Config.CopyToAsync(browserConfigStream);
+
+				srcDirectory.Delete(true);
+			};
+
+			process.Start();
+			process.BeginOutputReadLine();
+
+			await process.WaitForExitAsync();
+
+			return Results.Ok();
+		})
+	.DisableAntiforgery();
 
 app.MapPost("/auth/registration", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.RegisterUser(input); });
 app.MapPost("/auth/authorization", ([FromServices] IAuthService authService, UserAuthInput input) => { return authService.AuthorizeUser(input); });
