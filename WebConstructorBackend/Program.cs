@@ -149,20 +149,27 @@ app.MapPost("/build",
             };
 
             process.OutputDataReceived += (_, eventArgs) => Console.WriteLine(eventArgs.Data);
-            process.Exited += (_, _) =>
+            process.Exited += async (_, _) =>
             {
                 Console.WriteLine("Exited npm run build");
-                srcDirectory.Delete(true);
-
+                
                 var browserPath = Path.Combine(buildDirectory.FullName, "browser");
                 var browserDirectory = new DirectoryInfo(browserPath);
-                
+                    
                 if (Directory.Exists(browserPath))
                 {
                     browserDirectory.DeepCopy(buildDirectory);
                     browserDirectory.Delete(recursive: true);
                 }
+                
+                var browserConfigPath = Path.Combine(buildDirectory.FullName, "config.json");
+                var browserConfigStream = File.Create(browserConfigPath);
+                
+                await request.Config.CopyToAsync(browserConfigStream);
+                
+                srcDirectory.Delete(true);
             };
+            
             process.Start();
             process.BeginOutputReadLine();
 
