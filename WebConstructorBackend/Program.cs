@@ -185,6 +185,7 @@ app.MapGet("/user/getByEmail", async([FromServices] IUserRepository userReposito
 
 // organization
 app.MapGet("organization/{name}", async([FromServices] IOrganizationRepository organizationRepository, string name) => { return organizationRepository.GetOrganizationByName(name); });
+app.MapGet("organization/{userId}", async([FromServices] IOrganizationRepository organizationRepository, Guid id) => { return organizationRepository.GetOrganizationByUser(id); });
 app.MapPost("organization/update", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] Organization org) => { return organizationRepository.UpdateOrganization(org); });
 app.MapPost("organization/create", async([FromServices] IOrganizationRepository organizationRepository, [FromBody] Organization org) => { return organizationRepository.CreateOrganization(org); });
 
