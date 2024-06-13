@@ -31,5 +31,9 @@ namespace WebConstructorBackend.Domain.Services.Repositories
         public void RemoveCouch(Guid organizationID, Couch couch);
 
         public List<User> GetVisitors(Guid organizationID);
+
+        public bool IsUserOrganizator(Guid userID);
+
+        public Organization GetOrganizationByUser(Guid userID);
     }
 }

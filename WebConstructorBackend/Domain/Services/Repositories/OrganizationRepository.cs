@@ -129,5 +129,19 @@ namespace WebConstructorBackend.Domain.Services.Repositories
 
             return null;
         }
+
+        public bool IsUserOrganizator(Guid userID)
+        {
+            var usersOrganization = _db.Organizations.Where(x => x.OrganizatorID == userID);
+
+            if (usersOrganization.Count() > 1)
+                throw new Exception("Пользователь владеет больше чем одной организацией");
+            return usersOrganization.Count() == 0 ? false : true;
+        }
+
+        public Organization GetOrganizationByUser(Guid userID)
+        {
+            return _db.Organizations.FirstOrDefault(x => x.OrganizatorID == userID);
+        }
     }
 }
