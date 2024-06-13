@@ -1,0 +1,18 @@
+services:
+  web-constructor:
+    image: ghcr.io/unionfour/web-constructor:master
+    ports:
+      - "8081:80"
+
+  backend:
+    image: ghcr.io/unionfour/webconstructorbackend:master
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/www/html:/app/Sites
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30

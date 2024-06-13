@@ -85,7 +85,6 @@ builder.Services
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();
@@ -136,7 +135,7 @@ app.MapPost("/build",
 			var nodeModulesDirectory = Path.Combine(options.Value.NodeModulesPath ?? throw new NotImplementedException(), "node_modules");
 			Directory.CreateSymbolicLink(Path.Combine(srcDirectory.FullName, "node_modules"), nodeModulesDirectory);
 			
-			var command = $"npm run ng build -- --output-path={buildDirectory.FullName}";
+			var command = $"npm run ng build -- --output-path={buildDirectory.FullName} --base-href /{request.Organisation}/";
 			var shell = OperatingSystem.IsWindows() ? "cmd" : "sh";
 			var args = OperatingSystem.IsWindows() ? $"/c {command}" : $"-c \"{command}\"";
 
@@ -157,6 +156,15 @@ app.MapPost("/build",
             {
                 Console.WriteLine("Exited npm run build");
                 srcDirectory.Delete(true);
+
+                var browserPath = Path.Combine(buildDirectory.FullName, "browser");
+                var browserDirectory = new DirectoryInfo(browserPath);
+                
+                if (Directory.Exists(browserPath))
+                {
+                    browserDirectory.DeepCopy(buildDirectory);
+                    browserDirectory.Delete(recursive: true);
+                }
             };
             process.Start();
             process.BeginOutputReadLine();
